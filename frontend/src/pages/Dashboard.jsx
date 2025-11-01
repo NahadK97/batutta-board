@@ -3,6 +3,7 @@ import { useTripsContext } from '../hooks/useTripsContext';
 import { useAuthContext } from '../hooks/useAuthContext';
 import TravelCard from '../components/TravelCard';
 import CardModal from '../components/CardModal';
+import Header from '../components/Header';
 
 const Dashboard = () => {
     const { trips, dispatch } = useTripsContext();
@@ -61,9 +62,8 @@ const Dashboard = () => {
             const json = await response.json();
 
             if (response.ok) {
-                // ✅ Add new trip to context (so it appears in Personal Dashboard too)
-                dispatch({ type: 'CREATE_TRIP', payload: json });
                 setIsModalOpen(false);
+                return json;
             } else {
                 alert('Failed to create trip: ' + (json.error || 'Unknown error'));
             }

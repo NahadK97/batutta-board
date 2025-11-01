@@ -30,6 +30,9 @@ const Login = () => {
         onChange={(e) => setPassword(e.target.value)}
         required
       />
+
+      {error && <div className="error">{error}</div>}
+
       <button disabled={isLoading} onClick={handleLogin}>Login</button>
       <p style={{ textAlign: "center", marginTop: "1rem" }}>
         Don't have an account?{" "}

@@ -5,21 +5,40 @@ export const TripsContext = createContext();
 export const tripsReducer = (state, action) => {
     switch (action.type) {
         case "SET_TRIPS":
-            return { trips: action.payload };
+            // Homepage trips (from other users)
+            return {
+                ...state,
+                trips: action.payload
+            };
+
+        case "SET_MY_TRIPS":
+            // Personal dashboard trips (current user's trips)
+            return {
+                ...state,
+                myTrips: action.payload
+            };
 
         case "CREATE_TRIP":
-            return { trips: [action.payload, ...state.trips] };
+            // Add to myTrips only
+            return {
+                ...state,
+                myTrips: [action.payload, ...(state.myTrips || [])]
+            };
 
         case "UPDATE_TRIP":
+            // Update in myTrips only
             return {
-                trips: state.trips.map(trip =>
+                ...state,
+                myTrips: (state.myTrips || []).map(trip =>
                     trip._id === action.payload._id ? action.payload : trip
                 ),
             };
 
         case "DELETE_TRIP":
+            // Delete from myTrips only
             return {
-                trips: state.trips.filter((trip) => trip._id !== action.payload._id),
+                ...state,
+                myTrips: (state.myTrips || []).filter((trip) => trip._id !== action.payload._id),
             };
 
         default:
@@ -29,7 +48,8 @@ export const tripsReducer = (state, action) => {
 
 export const TripsContextProvider = ({ children }) => {
     const [state, dispatch] = useReducer(tripsReducer, {
-        trips: [],
+        trips: [],      // Other users' trips (homepage)
+        myTrips: []     // Current user's trips (personal dashboard)
     });
 
     return (

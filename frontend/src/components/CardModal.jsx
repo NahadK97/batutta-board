@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 
 function CardModal({ card, onClose, onSave }) {
+  const navigate = useNavigate();
   const [formData, setFormData] = useState({
     src: '', dst: '', date: '', time: '', contact: '', notes: ''
   });
@@ -22,6 +24,7 @@ function CardModal({ card, onClose, onSave }) {
       return;
     }
     onSave(formData);
+    navigate("/trips/user/me")
   };
 
   return (

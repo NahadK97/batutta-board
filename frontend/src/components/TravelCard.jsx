@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { useTripsContext } from "../hooks/useTripsContext";
 import { useAuthContext } from "../hooks/useAuthContext";
 
-function TravelCard({ card }) {
+function TravelCard({ card, isPersonalDashboard = false }) {
   const { dispatch } = useTripsContext();
   const { user: currentUser } = useAuthContext();
   const [isEditing, setIsEditing] = useState(false);
@@ -26,6 +26,9 @@ function TravelCard({ card }) {
 
   const handleDelete = async () => {
     if (!currentUser) return;
+
+    if (!window.confirm('Are you sure you want to delete this trip?')) return;
+
     const API_BASE_URL = process.env.REACT_APP_BACKEND_URL || '';
 
     try {
@@ -33,14 +36,17 @@ function TravelCard({ card }) {
         method: 'DELETE',
         headers: { 'Authorization': `Bearer ${currentUser.token}` }
       });
+
       if (response.ok) {
+        //  DELETE_TRIP will remove from myTrips (in the reducer)
         dispatch({ type: 'DELETE_TRIP', payload: card });
       } else {
         const json = await response.json();
-        console.error('Delete failed:', json.error || json.message);
+        alert('Delete failed: ' + (json.error || json.message));
       }
     } catch (err) {
       console.error('Network error:', err);
+      alert('Network error while deleting');
     }
   };
 
@@ -84,6 +90,7 @@ function TravelCard({ card }) {
       const json = await response.json();
 
       if (response.ok) {
+        //  UPDATE_TRIP will update in myTrips (in the reducer)
         dispatch({ type: 'UPDATE_TRIP', payload: json });
         setIsEditing(false);
       } else {
@@ -91,7 +98,7 @@ function TravelCard({ card }) {
       }
     } catch (err) {
       console.error('Update error:', err);
-      alert('Network error');
+      alert('Network error while updating');
     }
   };
 
@@ -104,12 +111,47 @@ function TravelCard({ card }) {
   if (isEditing) {
     return (
       <div className="card">
-        <input name="source" value={editData.source} onChange={handleChange} placeholder="Source" required />
-        <input name="destination" value={editData.destination} onChange={handleChange} placeholder="Destination" required />
-        <input name="date" type="date" value={editData.date} onChange={handleChange} required />
-        <input name="time" type="time" value={editData.time} onChange={handleChange} required />
-        <input name="contactNumber" value={editData.contactNumber} onChange={handleChange} placeholder="Contact Number" required />
-        <textarea name="notes" value={editData.notes} onChange={handleChange} placeholder="Notes" />
+        <input
+          name="source"
+          value={editData.source}
+          onChange={handleChange}
+          placeholder="Source"
+          required
+        />
+        <input
+          name="destination"
+          value={editData.destination}
+          onChange={handleChange}
+          placeholder="Destination"
+          required
+        />
+        <input
+          name="date"
+          type="date"
+          value={editData.date}
+          onChange={handleChange}
+          required
+        />
+        <input
+          name="time"
+          type="time"
+          value={editData.time}
+          onChange={handleChange}
+          required
+        />
+        <input
+          name="contactNumber"
+          value={editData.contactNumber}
+          onChange={handleChange}
+          placeholder="Contact Number"
+          required
+        />
+        <textarea
+          name="notes"
+          value={editData.notes}
+          onChange={handleChange}
+          placeholder="Notes"
+        />
         <br />
         <button onClick={handleSave}>Save</button>
         <button onClick={handleCancel}>Cancel</button>
@@ -119,6 +161,7 @@ function TravelCard({ card }) {
 
   const isOwner = currentUser && (currentUser.email === card.user.email);
   const cardAuthor = isOwner ? "You" : card.user.email;
+
   // View Mode UI
   return (
     <div className="card">
@@ -128,9 +171,13 @@ function TravelCard({ card }) {
       📞 {card.contactNumber || 'N/A'}<br />
       <em>{card.notes || 'No notes'}</em>
       <br />
-      {isOwner && (<button onClick={handleEdit}>Edit</button>)}
-      {isOwner && (< button onClick={handleDelete}>Delete</button>)}
-    </div >
+      {isOwner && (
+        <>
+          <button onClick={handleEdit}>Edit</button>
+          <button onClick={handleDelete}>Delete</button>
+        </>
+      )}
+    </div>
   );
 }
 

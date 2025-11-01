@@ -1,10 +1,18 @@
 import React from 'react';
 import { useLogout } from '../hooks/useLogout';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 function Header({ user }) {
   const { logout } = useLogout();
   const navigate = useNavigate();
+  const location = useLocation();
+
+  // Determine current page based on route
+  const getCurrentPage = () => {
+    if (location.pathname === '/trips/user/me') return 'personal';
+    if (location.pathname === '/' || location.pathname === '/dashboard') return 'home';
+    return '';
+  };
 
   const handleMenuChange = (e) => {
     const value = e.target.value;
@@ -13,8 +21,7 @@ function Header({ user }) {
       logout();
     } else if (value === "personal") {
       navigate("/trips/user/me");
-    }
-    else if (value == "home") {
+    } else if (value === "home") {
       navigate("/");
     }
   };
@@ -23,7 +30,10 @@ function Header({ user }) {
     <header>
       {user && (
         <div className="menu">
-          <select onChange={handleMenuChange}>
+          <select
+            value={getCurrentPage()}
+            onChange={handleMenuChange}
+          >
             <option value="">☰ Menu</option>
             <option value="personal">Personal Dashboard</option>
             <option value="home">Homepage</option>
