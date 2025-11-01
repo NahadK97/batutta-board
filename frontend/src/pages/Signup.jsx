@@ -41,9 +41,8 @@ const Signup = () => {
         required
         style={{ width: '100%', padding: '10px', boxSizing: 'border-box' }}
       >
-        <option value="user">User</option>
         <option value="Student">Student</option>
-        <option value="Admin">Admin</option>
+        <option value="Faculty">Faculty</option>
       </select>
 
       <button disabled={isLoading} onClick={handleSubmit} style={{ marginTop: '20px' }}>
