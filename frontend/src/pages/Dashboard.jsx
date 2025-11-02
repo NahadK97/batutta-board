@@ -10,6 +10,8 @@ const Dashboard = () => {
     const { user } = useAuthContext();
     const [filterSource, setFilterSource] = useState('');
     const [filterDestination, setFilterDestination] = useState('');
+    const [startDate, setStartDate] = useState(''); // Start date for range
+    const [endDate, setEndDate] = useState(''); // End date for range
     const [isModalOpen, setIsModalOpen] = useState(false);
 
     // Fetch trips from OTHER users
@@ -74,16 +76,40 @@ const Dashboard = () => {
     };
 
     const uniqueSources = useMemo(() =>
-        [...new Set(trips.map(trip => trip.source))], [trips]
+        [...new Set(trips.map(trip => trip.source?.trim()).filter(Boolean))], [trips]
     );
     const uniqueDestinations = useMemo(() =>
-        [...new Set(trips.map(trip => trip.destination))], [trips]
+        [...new Set(trips.map(trip => trip.destination?.trim()).filter(Boolean))], [trips]
     );
 
+    // Filter trips by source, destination, AND date range
     const filteredTrips = trips.filter(trip => {
-        return (!filterSource || trip.source === filterSource) &&
-            (!filterDestination || trip.destination === filterDestination);
+        const matchesSource = !filterSource || trip.source === filterSource;
+        const matchesDestination = !filterDestination || trip.destination === filterDestination;
+
+        // Date range matching
+        let matchesDate = true;
+        if (startDate || endDate) {
+            const tripDate = new Date(trip.date).toISOString().split('T')[0];
+
+            if (startDate) {
+                matchesDate = matchesDate && tripDate >= startDate;
+            }
+            if (endDate) {
+                matchesDate = matchesDate && tripDate <= endDate;
+            }
+        }
+
+        return matchesSource && matchesDestination && matchesDate;
     });
+
+    // Clear all filters
+    const handleClearFilters = () => {
+        setFilterSource('');
+        setFilterDestination('');
+        setStartDate('');
+        setEndDate('');
+    };
 
     return (
         <div className="dashboard">
@@ -96,22 +122,46 @@ const Dashboard = () => {
                 </button>
 
                 <h3>Filter Travel Cards</h3>
-                <select value={filterSource} onChange={(e) => setFilterSource(e.target.value)}>
-                    <option value="">Filter by Source</option>
-                    {uniqueSources.map(src => (
-                        <option key={src} value={src}>{src}</option>
-                    ))}
-                </select>
-                <select value={filterDestination} onChange={(e) => setFilterDestination(e.target.value)}>
-                    <option value="">Filter by Destination</option>
-                    {uniqueDestinations.map(dst => (
-                        <option key={dst} value={dst}>{dst}</option>
-                    ))}
-                </select>
+                <div className="filters">
+                    <select value={filterSource} onChange={(e) => setFilterSource(e.target.value)}>
+                        <option value="">Filter by Source</option>
+                        {uniqueSources.map(src => (
+                            <option key={src} value={src}>{src}</option>
+                        ))}
+                    </select>
+
+                    <select value={filterDestination} onChange={(e) => setFilterDestination(e.target.value)}>
+                        <option value="">Filter by Destination</option>
+                        {uniqueDestinations.map(dst => (
+                            <option key={dst} value={dst}>{dst}</option>
+                        ))}
+                    </select>
+
+                    {/* Date Range Filters */}
+                    <input
+                        type="date"
+                        value={startDate}
+                        onChange={(e) => setStartDate(e.target.value)}
+                        placeholder="From Date"
+                    />
+                    <input
+                        type="date"
+                        value={endDate}
+                        onChange={(e) => setEndDate(e.target.value)}
+                        placeholder="To Date"
+                    />
+
+                    {/* Clear Filters Button */}
+                    {(filterSource || filterDestination || startDate || endDate) && (
+                        <button onClick={handleClearFilters} className="clear-btn">
+                            Clear Filters
+                        </button>
+                    )}
+                </div>
 
                 <div className="travel-cards">
                     {filteredTrips.length === 0 ? (
-                        <p>No trips from other users found.</p>
+                        <p>No trips found matching your filters.</p>
                     ) : (
                         filteredTrips.map(trip => (
                             <TravelCard key={trip._id} card={trip} />

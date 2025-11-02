@@ -1,13 +1,20 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSignup } from "../hooks/useSignup";
 import { useNavigate } from "react-router-dom";
 
 const Signup = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState("user");
+  const [role, setRole] = useState("Student");
   const { signup, error, isLoading } = useSignup();
   const navigate = useNavigate();
+
+  // Show alert when error changes
+  useEffect(() => {
+    if (error) {
+      alert(error);
+    }
+  }, [error]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -48,8 +55,6 @@ const Signup = () => {
       <button disabled={isLoading} onClick={handleSubmit} style={{ marginTop: '20px' }}>
         Sign Up
       </button>
-
-      {error && <div className="error">{error}</div>}
 
       <p style={{ textAlign: "center", marginTop: "1rem" }}>
         Already have an account?{" "}

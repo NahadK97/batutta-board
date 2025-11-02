@@ -30,7 +30,11 @@ userSchema.statics.signup = async function (email, password, role) {
     throw Error("Email is not valid");
   }
   if (!validator.isStrongPassword(password)) {
-    throw Error("Password is not strong enough");
+    throw Error(
+      "Password is not strong enough\n" +
+      "Must be at least 8 characters\n" +
+      "Must have a special character, a digit, and both uppercase and lowercase letters"
+    );
   }
   if (!["Student", "Faculty", "Admin"].includes(role)) {
     throw Error("Invalid role");

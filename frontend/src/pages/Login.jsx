@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from "react";
 import { useLogin } from '../hooks/useLogin';
 import { useNavigate } from 'react-router-dom';
 
@@ -7,6 +7,12 @@ const Login = () => {
   const [password, setPassword] = useState('');
   const { login, error, isLoading } = useLogin();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (error) {
+      alert(error);
+    }
+  }, [error]);
 
   const handleLogin = async (e) => {
     e.preventDefault();
@@ -30,8 +36,6 @@ const Login = () => {
         onChange={(e) => setPassword(e.target.value)}
         required
       />
-
-      {error && <div className="error">{error}</div>}
 
       <button disabled={isLoading} onClick={handleLogin}>Login</button>
       <p style={{ textAlign: "center", marginTop: "1rem" }}>
